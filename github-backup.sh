@@ -5,6 +5,10 @@
 #   GITHUB_TOKEN=... github-backup.sh <GITHUB_USERNAME> <TARGET_DIR> [include_forks]
 #   GITHUB_TOKEN_FILE=/path/to/token.txt github-backup.sh <GITHUB_USERNAME> <TARGET_DIR> [include_forks]
 #
+# PAT requirements:
+#   Fine-grained personal access token, access to all repositories,
+#   permissions: read-only for contents and metadata
+#
 # Parameters:
 #   GITHUB_USERNAME - GitHub username for the token owner; used as a safety check when selecting owned repositories
 #   TARGET_DIR      - Local directory to store bare mirrors (<TARGET_DIR>/<repo>.git)
