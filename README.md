@@ -1,11 +1,8 @@
 # GitHub Repository Backup
 
-This script makes a local backup of every (public and private) GitHub repository you own. It does this by:
+This script makes a local backup of every (public and private) GitHub repository you own.
 
-- asking the GitHub API for the list of repositories owned by your account
-- cloning repositories that are not yet present locally
-- updating repositories that were already cloned earlier
-- storing each backup as a bare mirror repository in a target directory
+Repositories that don't exist locally are cloned. Repositories that do exist are updated. Backups are stored as bare mirror repositories.
 
 The result is a folder like this:
 
@@ -16,24 +13,25 @@ The result is a folder like this:
   repo-three.git/
 ```
 
-Each `*.git` directory is a Git mirror created with `git clone --mirror`. That means it contains all branches, tags, and remote refs for the repository.
+Each `*.git` directory is a Git mirror created with `git clone --mirror`. That means it contains all branches, tags, and remote refs.
 
-## How it works
+## How the backup script works
 
-More precisely, the script:
+The script:
 
-- authenticates to the GitHub API with a personal access token
+- authenticates to the GitHub API with a personal access token (PAT)
 - verifies that the token belongs to the GitHub username you passed in
 - requests all repositories owned by that user, including private repositories the token can access
 - optionally excludes forked repositories
 - clones missing repositories as mirrors
-- runs `git fetch --prune --tags origin` for repositories that already exist locally
+- updates repositories that already exist locally
 - keeps each mirror's `origin` remote set to the public GitHub URL instead of storing the token in Git config
 
 ### What's not covered
 
 - It does not create working copies you can edit directly.
-- It does not back up repositories you do not own.
+  - To create a working copy, run `git clone` on a backup directory (see below).
+
 - It does not delete local mirrors when a repository is deleted on GitHub.
 - It does not include issues, pull requests, releases, or other non-Git GitHub data.
 
@@ -55,6 +53,8 @@ You also need a GitHub personal access token (PAT) with these properties:
 
 ## Usage
 
+### Backup
+
 Set exactly one of these environment variables:
 
 - `GITHUB_TOKEN`, or
@@ -72,6 +72,14 @@ Arguments:
    - If the username does not match the authenticated token owner, the script stops
 - `TARGET_DIR`: directory where mirror repositories are stored
 - `include_forks`: optional; defaults to `false`; accepted true values are `true`, `1`, `yes`, and `y`
+
+### Working copy from backup
+
+To use a backup and work on the code, create a working copy from the bare mirror repository in the backup directory:
+
+```bash
+git clone /path/to/backup-directory /path/to/new/working-directory
+```
 
 ## Examples
 
@@ -120,8 +128,8 @@ For a repository named `example-repo`, the script creates:
 This is a bare mirror repository. To inspect it, use Git commands directly, for example:
 
 ```bash
-git -C /srv/github-backup/example-repo.git show-ref
-git -C /srv/github-backup/example-repo.git log --all --oneline | head
+git -C ./example-repo.git show-ref
+git -C ./example-repo.git log --all --oneline | head
 ```
 
 ## Exit codes
